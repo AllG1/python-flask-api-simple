@@ -205,3 +205,6 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# keep .devcontainer/mysql-data/.keep but not other files in .devcontainer/mysql-data
+.devcontainer/mysql-data/
