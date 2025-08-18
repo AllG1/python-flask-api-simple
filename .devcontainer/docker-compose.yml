@@ -3,10 +3,11 @@ services:
   app:
     build:
       context: ..
-      dockerfile: ./.devcontainer/Dockerfile
+      dockerfile: ./.devcontainer/app.dockerfile
       args:
         - VERSION=1.0.0
-    container_name: python-flask-api-mockup-container
+        - APP_ENV_TYPE=dev
+    container_name: "python-flask-api-mockup-container"
     volumes:
       - ..:/workspace
       - /etc/hosts:/etc/hosts
@@ -15,7 +16,10 @@ services:
     command: ["sleep", "infinity"]
   
   mysql:
-    image: mysql:8.0
+    build:
+      context: ..
+      dockerfile: ./.devcontainer/mysql.dockerfile
+    container_name: "python-flask-api-mockup-mysql"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: mydb

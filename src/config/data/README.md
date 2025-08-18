@@ -1,0 +1,2 @@
+These .env files are just sample for this project.
+If you want to use some files in your project, then make a secret repository and use that with submodule, or something different ways. If you don't, then it may occur CRITICAL security issue with your project.

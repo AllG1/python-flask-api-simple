@@ -9,6 +9,12 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 flask = "3.1.1"
+pymysql = "^1.1.1"
+dbutils = "^3.1.1"
+pydantic = "^2.11.7"
+pydantic-settings = "^2.10.1"
+cryptography = "^45.0.6"
+http-response-codes = "^0.2.0"
 
 
 [build-system]
