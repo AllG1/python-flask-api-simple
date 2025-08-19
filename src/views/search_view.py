@@ -2,8 +2,10 @@
 
 import logging
 from flask import Blueprint, jsonify
+from response_codes import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
 from db import get_employee
+from utils.response_form import make_response_form
 
 
 search_bp = Blueprint('search', __name__, url_prefix='/search')
@@ -29,8 +31,13 @@ def search_by_id(employee_id: int):
         # get employee data from database or data source
         employee_data = get_employee(employee_id)
         logger.info(f"Employee data retrieved: {employee_data}")
-        return jsonify({"employee_data": employee_data})
+        if employee_data:
+            resp, http_code = make_response_form(data=employee_data)
+        else:  # no data found
+            resp, http_code = make_response_form(http_status=HTTP_404_NOT_FOUND)
+        return jsonify(resp), http_code
 
     except ValueError as e:
         logger.error(f"Error occurred: {e}")
-        return jsonify({"error": str(e)}), 400
+        resp, http_code = make_response_form(http_status=HTTP_500_INTERNAL_SERVER_ERROR)
+        return jsonify(resp), http_code
