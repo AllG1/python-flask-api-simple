@@ -10,6 +10,11 @@ from db import db_session_auto_close
 logger = logging.getLogger("app")
 
 
+# ============================================================================================
+# Employee Database Operations
+# ============================================================================================
+
+
 @db_session_auto_close
 def create_employee(employee_data: dict, cursor: pymysql.cursors.DictCursor=None) -> int:
     """ 
