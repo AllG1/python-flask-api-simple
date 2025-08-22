@@ -5,10 +5,10 @@ import logging
 import re
 
 from flask import Blueprint, jsonify, request
-from pydantic import BaseModel, field_validator, ValidationError
-from response_codes import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR
+from pydantic import BaseModel, field_validator
+from response_codes import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_204_NO_CONTENT
 
-from db import create_employee
+from db import create_employee, delete_employee
 from utils.response_form import make_response_form
 
 
@@ -135,6 +135,26 @@ def create_employee_route():
         create_employee(employee_data)
         logger.info(f"Employee created successfully: {employee_data}")
         resp, http_code = make_response_form(http_status=HTTP_201_CREATED)
+        return jsonify(resp), http_code
+
+    except Exception as e:
+        logger.exception(f"Error occurred: {e}")
+        resp, http_code = make_response_form(http_status=HTTP_500_INTERNAL_SERVER_ERROR)
+        return jsonify(resp), http_code
+
+
+@manage_bp.route("/delete/<int:employee_id>", methods=["POST"])
+def delete_employee_route(employee_id: int):
+    """
+    Route to delete an employee
+    """
+    logger.info(f"Delete employee request received for ID: {employee_id}")
+
+    try:
+        # Call the delete_employee function from the db module
+        delete_employee(employee_id)
+        logger.info(f"Employee deleted successfully: {employee_id}")
+        resp, http_code = make_response_form(http_status=HTTP_204_NO_CONTENT)
         return jsonify(resp), http_code
 
     except Exception as e:
