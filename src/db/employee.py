@@ -1,6 +1,7 @@
 """ Some execution context for employee database operations """
 
 import logging
+from typing import List
 
 import pymysql
 
@@ -8,6 +9,11 @@ from db import db_session_auto_close
 
 
 logger = logging.getLogger("app")
+
+
+# ============================================================================================
+# Employee Database Operations
+# ============================================================================================
 
 
 @db_session_auto_close
@@ -36,3 +42,40 @@ def get_employee(employee_id: int, cursor: pymysql.cursors.DictCursor=None) -> d
     query = "SELECT * FROM employee_list WHERE id = %(employee_id)s"
     cursor.execute(query, {"employee_id": employee_id})
     return cursor.fetchone()
+
+
+@db_session_auto_close
+def get_employees_by_position(position_id: int, cursor: pymysql.cursors.DictCursor=None) -> List[dict]:
+    """
+    Get a list of employees by position ID
+    :param position_id: The ID of the position
+    :param cursor: The database cursor
+    :return: A list of dictionaries containing employee information
+    """
+    query = "SELECT * FROM employee_list WHERE position = %(position)s"
+    cursor.execute(query, {"position": position_id})
+    return cursor.fetchall()
+
+
+@db_session_auto_close
+def get_employees_by_department(department_id: int, cursor: pymysql.cursors.DictCursor=None) -> List[dict]:
+    """
+    Get a list of employees by department ID
+    :param department_id: The ID of the department
+    :param cursor: The database cursor
+    :return: A list of dictionaries containing employee information
+    """
+    query = "SELECT * FROM employee_list WHERE department = %(department)s"
+    cursor.execute(query, {"department": department_id})
+    return cursor.fetchall()
+
+
+@db_session_auto_close
+def delete_employee(employee_id: int, cursor: pymysql.cursors.DictCursor=None) -> None:
+    """
+    Delete an employee record by ID
+    :param employee_id: The ID of the employee
+    :param cursor: The database cursor
+    """
+    query = "DELETE FROM employee_list WHERE id = %(employee_id)s"
+    cursor.execute(query, {"employee_id": employee_id})
