@@ -1,12 +1,15 @@
 """ APIs for manage employee """
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 import logging
 import re
+
 from flask import Blueprint, jsonify, request
 from pydantic import BaseModel, field_validator
+from response_codes import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_204_NO_CONTENT
 
-from db import create_employee
+from db import create_employee, delete_employee
+from utils.response_form import make_response_form
 
 
 manage_bp = Blueprint('manage', __name__, url_prefix='/manage')
@@ -94,7 +97,23 @@ def create_employee_route():
         request_data = CreateEmployeeRequest(**request.form.to_dict())
     except Exception as e:
         logger.error(f"Validation error occurred: {e}")
-        return jsonify({"error": str(e)}), 400
+
+        # check some field are missing
+        missing_fields = list()
+        try:
+            required_fields = list(
+                map(
+                    lambda item: item[0],
+                    filter(lambda item: item[1].is_required(), CreateEmployeeRequest.model_fields.items())
+                )
+            )
+            missing_fields = list(filter(lambda x: x not in request.form, required_fields))
+        except:
+            pass
+        description = f"Missing fields: {','.join(missing_fields)}" if missing_fields else "Validation error occurred"
+
+        resp, http_code = make_response_form(http_status=HTTP_400_BAD_REQUEST, description=description)
+        return jsonify(resp), http_code
 
     try:
         # Here you would typically get the employee data from the request
@@ -115,8 +134,30 @@ def create_employee_route():
         # Call the create_employee function from the db module
         create_employee(employee_data)
         logger.info(f"Employee created successfully: {employee_data}")
-        return jsonify({"message": "Employee created successfully"}), 201
+        resp, http_code = make_response_form(http_status=HTTP_201_CREATED)
+        return jsonify(resp), http_code
 
     except Exception as e:
         logger.exception(f"Error occurred: {e}")
-        return jsonify({"error": str(e)}), 500
+        resp, http_code = make_response_form(http_status=HTTP_500_INTERNAL_SERVER_ERROR)
+        return jsonify(resp), http_code
+
+
+@manage_bp.route("/delete/<int:employee_id>", methods=["POST"])
+def delete_employee_route(employee_id: int):
+    """
+    Route to delete an employee
+    """
+    logger.info(f"Delete employee request received for ID: {employee_id}")
+
+    try:
+        # Call the delete_employee function from the db module
+        delete_employee(employee_id)
+        logger.info(f"Employee deleted successfully: {employee_id}")
+        resp, http_code = make_response_form(http_status=HTTP_204_NO_CONTENT)
+        return jsonify(resp), http_code
+
+    except Exception as e:
+        logger.exception(f"Error occurred: {e}")
+        resp, http_code = make_response_form(http_status=HTTP_500_INTERNAL_SERVER_ERROR)
+        return jsonify(resp), http_code
