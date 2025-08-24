@@ -9,7 +9,7 @@ logging_config = {
             'format': '[%(asctime)s][%(levelname)s][%(filename)s:%(lineno)d][%(funcName)s] %(message)s'
         },
         'verbose': {
-            'format': '[%(asctime)s][%(name)s][%(levelname)s][%(filename)s:%(lineno)d] %(message)s'
+            'format': '[%(asctime)s][%(name)s][%(levelname)s][%(message)s][%(filename)s:%(lineno)d]'
         }
     },
     'handlers': {

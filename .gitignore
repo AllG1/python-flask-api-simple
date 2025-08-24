@@ -207,6 +207,3 @@ __marimo__/
 
 # keep .devcontainer/mysql-data/.keep but not other files in .devcontainer/mysql-data
 .devcontainer/mysql-data/
-
-# keep build/mysql-data/.keep but not other files in build/mysql-data
-build/mysql-data/
