@@ -3,6 +3,7 @@
 from datetime import datetime, timezone
 import logging
 import re
+from typing import Optional
 
 from flask import Blueprint, jsonify, request
 from pydantic import BaseModel, field_validator
@@ -29,7 +30,7 @@ class CreateEmployeeRequest(BaseModel):
     department: int
     phone_number: str
     email: str
-    birth_date: str = "0000-00-00"
+    birth_date: Optional[str] = None
 
     @field_validator("email")
     def validate_email(cls, value):
@@ -42,9 +43,11 @@ class CreateEmployeeRequest(BaseModel):
         # check birth_date is in YYYY-MM-DD format
         # If there's no birthday information of employee, then insert 0000-00-00
         if not value:
-            return "0000-00-00"
+            return None
         if not re.match(r"^\d{4}-\d{2}-\d{2}$", value):
             raise ValueError("Invalid birth date format. Expected YYYY-MM-DD.")
+        elif not datetime.strptime(value, "%Y-%m-%d"):
+            raise ValueError("Invalid birth date. Date does not exist.")
         return value
     
     @field_validator("position", mode="before")
@@ -96,7 +99,7 @@ def create_employee_route():
     try:
         request_data = CreateEmployeeRequest(**request.form.to_dict())
     except Exception as e:
-        logger.error(f"Validation error occurred: {e}")
+        logger.info(f"Validation error occurred: {e}")
 
         # check some field are missing
         missing_fields = list()
@@ -132,9 +135,13 @@ def create_employee_route():
         }
 
         # Call the create_employee function from the db module
-        create_employee(employee_data)
-        logger.info(f"Employee created successfully: {employee_data}")
-        resp, http_code = make_response_form(http_status=HTTP_201_CREATED)
+        employee_id = create_employee(employee_data)
+        if employee_id:
+            logger.info(f"Employee created successfully: (employee id: {employee_id}) {employee_data}")
+            resp, http_code = make_response_form(http_status=HTTP_201_CREATED)
+        else:
+            logger.info(f"Failed to create employee: {employee_data}")
+            resp, http_code = make_response_form(http_status=HTTP_500_INTERNAL_SERVER_ERROR)
         return jsonify(resp), http_code
 
     except Exception as e:
