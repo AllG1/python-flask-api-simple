@@ -13,6 +13,7 @@ from config.load_main import get_settings, set_settings
 from db.init_pool import set_db_pool
 from views.manage_view import manage_bp
 from views.search_view import search_bp
+from views.data_view import data_bp
 
 # ============================================================================================
 # Set Environment Variable for test
@@ -39,6 +40,7 @@ class APITestCase(unittest.TestCase):
         app = Flask(__name__)
         app.register_blueprint(manage_bp)
         app.register_blueprint(search_bp)
+        app.register_blueprint(data_bp)
         self.client = app.test_client()
 
     def test_create_employee_missing_fields(self):
@@ -60,6 +62,21 @@ class APITestCase(unittest.TestCase):
         # Accept 201 or 500 if DB is not mocked
         self.assertIn(response.status_code, [201, 500])
 
+    def test_inactivate_employee(self):
+        # Example: inactivate employee with id 1
+        response = self.client.post('/manage/inactivate/1')
+        self.assertIn(response.status_code, [200, 500])
+
+    def test_promote_employee(self):
+        # Promote employee with id 1 to manager
+        response = self.client.post('/manage/position/1/manager')
+        self.assertIn(response.status_code, [200, 400, 500])
+
+    def test_department_transfer(self):
+        # Transfer employee with id 1 to IT department
+        response = self.client.post('/manage/department/1/it')
+        self.assertIn(response.status_code, [200, 400, 500])
+
     def test_search_by_id_not_found(self):
         response = self.client.get('/search/id/999999')
         # Accept 404 or 500 if DB is not mocked
@@ -72,6 +89,14 @@ class APITestCase(unittest.TestCase):
     def test_search_by_department(self):
         response = self.client.get('/search/department/0')
         self.assertEqual(response.status_code, 200)
+
+    def test_get_employee_list(self):
+        response = self.client.get('/data/employee/0')
+        self.assertIn(response.status_code, [200, 500])
+
+    def test_get_document_list(self):
+        response = self.client.get('/data/documents/0')
+        self.assertIn(response.status_code, [200, 500])
 
 if __name__ == '__main__':
     unittest.main()

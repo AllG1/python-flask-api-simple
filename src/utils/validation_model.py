@@ -4,6 +4,7 @@
 
 import datetime
 import logging
+from typing import Optional
 
 from pydantic import BaseModel, field_validator
 
@@ -19,10 +20,10 @@ class EmployeeSearchResponse(BaseModel):
     department: str
     phone_number: str
     email: str
-    birth_date: str = "0000-00-00"
+    birth_date: Optional[str] = None
     status: str
     description: str = ""
-    register_time: str = "0000-00-00 00:00:00"
+    register_time: Optional[str] = None
 
     @field_validator("position", mode="before")
     def set_position(cls, v) -> str:

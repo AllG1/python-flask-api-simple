@@ -3,7 +3,7 @@
 from datetime import datetime, timezone
 import logging
 import re
-from typing import Tuple
+from typing import Optional, Tuple
 
 from flask import Blueprint, jsonify, request
 from pydantic import BaseModel, field_validator
@@ -227,7 +227,7 @@ def department_transfer_route(employee_id: int, new_department: str):
     :param employee_id: The ID of the employee who will transfer the department
     :param new_department: The Name of the new department
     """
-    logger.info(f"Transfer employee request received for employee ID: {employee_id} to department ID: {department_id}")
+    logger.info(f"Transfer employee request received for employee ID: {employee_id} to department: {new_department}")
 
     # check valid department
     valid_department, department_id = is_valid_department(new_department)

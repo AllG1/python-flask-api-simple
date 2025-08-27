@@ -6,7 +6,7 @@ from flask import Blueprint, jsonify
 from response_codes import HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR
 
 from db import get_employees, get_documents
-from utils import make_response_form, EmployeeSearchResponse, DocumentSearchResponse
+from utils import make_response_form, EmployeeSearchResponse, DocumentApprovalResponse
 
 
 data_bp = Blueprint('data', __name__, url_prefix='/data')
@@ -53,7 +53,7 @@ def get_document_list(offset: int):
         documents = get_documents(offset, limit)
 
         # make data return format
-        v_documents = list(map(lambda x: DocumentSearchResponse(**x).model_dump(), documents))
+        v_documents = list(map(lambda x: DocumentApprovalResponse(**x).model_dump(), documents))
         ret_dict = {"documents": v_documents, "offset": offset, "show_next_button": len(v_documents) == limit}
 
         # return validated data

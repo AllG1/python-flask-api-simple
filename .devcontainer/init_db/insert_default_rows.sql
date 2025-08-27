@@ -10,7 +10,7 @@ VALUES
 ('Eve', 'Kim', 0, 2, '010-0000-0007', 'eve.kim7@example.com', '1995-07-07', 1, 'Sample employee 7', '2023-01-07 09:00:00'),
 ('Frank', 'Park', 1, 2, '010-0000-0008', 'frank.park8@example.com', '1996-08-08', 1, 'Sample employee 8', '2023-01-08 09:00:00'),
 ('Grace', 'Choi', 2, 0, '010-0000-0009', 'grace.choi9@example.com', '1997-09-09', 1, 'Sample employee 9', '2023-01-09 09:00:00'),
-('Hank', 'Jung', 0, 1, '010-0000-0010', 'hank.jung10@example.com', '1998-10-10', 1, 'Sample employee 10', '2023-01-10 09:00:00')
+('Hank', 'Jung', 0, 1, '010-0000-0010', 'hank.jung10@example.com', '1998-10-10', 1, 'Sample employee 10', '2023-01-10 09:00:00');
 
 -- Insert sample document approvals
 INSERT INTO document_approval (issuer, assignee, status, dayoff_start_date, dayoff_end_date, reason)
@@ -24,4 +24,4 @@ VALUES
 (7, 3, 0, '2023-05-10', '2023-05-11', 'Vacation'),
 (8, 5, 1, '2023-05-12', '2023-05-12', 'Personal'),
 (9, 7, 2, '2023-05-13', '2023-05-14', 'Family event'),
-(10, 9, 0, '2023-05-15', '2023-05-15', 'Medical')
+(10, 9, 0, '2023-05-15', '2023-05-15', 'Medical');
