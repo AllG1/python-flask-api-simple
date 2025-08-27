@@ -14,3 +14,16 @@ CREATE TABLE employee_list(
     INDEX idx_employee_list_department (department) COMMENT 'Index for Department',
     INDEX idx_employee_list_status (status) COMMENT 'Index for Status'
 ) COMMENT 'Employee Information for Management';
+
+CREATE TABLE document_approval (
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT 'Primary Key',
+    issuer INT NOT NULL COMMENT 'Employee ID of the issuer (Who wants to take a day off)',
+    assignee INT NOT NULL COMMENT 'Employee ID of the assignee (Who checks the request)',
+    status TINYINT NOT NULL COMMENT 'Approval Status (0: Pending, 1: Approved, 2: Rejected)',
+    dayoff_start_date DATE NOT NULL COMMENT 'Start date of requested day off',
+    dayoff_end_date DATE NOT NULL COMMENT 'End date of requested day off',
+    reason VARCHAR(255) COMMENT 'Reason for day off',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation timestamp',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update timestamp',
+    FOREIGN KEY (issuer) REFERENCES employee_list(id)
+) COMMENT 'Document approval for dayoff requests';

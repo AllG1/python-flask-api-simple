@@ -3,13 +3,13 @@
 from datetime import datetime, timezone
 import logging
 import re
-from typing import Optional
+from typing import Tuple
 
 from flask import Blueprint, jsonify, request
 from pydantic import BaseModel, field_validator
-from response_codes import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_204_NO_CONTENT
+from response_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_204_NO_CONTENT
 
-from db import create_employee, delete_employee
+from db import create_employee, inactivate_employee, promote_employee, transfer_employee
 from utils.response_form import make_response_form
 
 
@@ -19,7 +19,7 @@ logger = logging.getLogger("app")
 
 
 # ============================================================================================
-# Pydantic classes for query validation
+# Pydantic classes & methods for query validation
 # ============================================================================================
 
 
@@ -82,6 +82,25 @@ class CreateEmployeeRequest(BaseModel):
                 raise ValueError("Invalid department. Expected one of: 0 (hr), 1 (IT), 2 (sales).")
         return value
 
+
+def is_valid_position(position: str) -> Tuple[bool, int]:
+    """ 
+    Check the position valid
+    :param position: position name
+    :return: Tuple[bool, int] - (is_valid, position_id)
+    """
+    valid_positions = {"employee": 0, "manager": 1, "admin": 2}
+    return position.lower() in valid_positions.keys(), valid_positions.get(position.lower(), -1)
+
+
+def is_valid_department(department: str) -> Tuple[bool, int]:
+    """
+    Check the department valid
+    :param department: department name
+    :return: Tuple[bool, int] - (is_valid, department_id)
+    """
+    valid_departments = {"hr": 0, "it": 1, "sales": 2}
+    return department.lower() in valid_departments.keys(), valid_departments.get(department.lower(), -1)
 
 # ============================================================================================
 # APIs
@@ -150,18 +169,78 @@ def create_employee_route():
         return jsonify(resp), http_code
 
 
-@manage_bp.route("/delete/<int:employee_id>", methods=["POST"])
-def delete_employee_route(employee_id: int):
+@manage_bp.route("/inactivate/<int:employee_id>", methods=["POST"])
+def inactivate_employee_route(employee_id: int):
     """
-    Route to delete an employee
+    Route to inactivate an employee.
+    Use this function if the employee cannot work anymore (e.g. fired, resigned)
+    :param employee_id: The ID of the employee to inactivate
     """
-    logger.info(f"Delete employee request received for ID: {employee_id}")
+    logger.info(f"Inactivate employee request received for ID: {employee_id}")
 
     try:
-        # Call the delete_employee function from the db module
-        delete_employee(employee_id)
-        logger.info(f"Employee deleted successfully: {employee_id}")
-        resp, http_code = make_response_form(http_status=HTTP_204_NO_CONTENT)
+        # Call the inactivate_employee function from the db module
+        inactivate_employee(employee_id)
+        logger.info(f"Employee inactivated successfully: {employee_id}")
+        resp, http_code = make_response_form(http_status=HTTP_200_OK)
+        return jsonify(resp), http_code
+
+    except Exception as e:
+        logger.exception(f"Error occurred: {e}")
+        resp, http_code = make_response_form(http_status=HTTP_500_INTERNAL_SERVER_ERROR)
+        return jsonify(resp), http_code
+
+
+@manage_bp.route("/position/<int:employee_id>/<string:new_position>", methods=["POST"])
+def promote_employee_route(employee_id: int, new_position: str):
+    """
+    Route to promote an employee to a new position.
+    :param employee_id: The ID of the employee who will change position
+    :param new_position: The new position to assign to the employee
+    """
+    logger.info(f"Promote employee request received for ID: {employee_id} to position: {new_position}")
+
+    # check valid position
+    valid_position, position_id = is_valid_position(new_position)
+    if not valid_position:
+        resp, http_code = make_response_form(http_status=HTTP_400_BAD_REQUEST, description="Invalid position")
+        return jsonify(resp), http_code
+
+    # update employee position
+    try:
+        # Call the promote_employee function from the db module
+        promote_employee(employee_id, position_id)
+        logger.info(f"Employee promoted successfully: {employee_id} to position: {new_position}(id: {position_id})")
+        resp, http_code = make_response_form(http_status=HTTP_200_OK)
+        return jsonify(resp), http_code
+
+    except Exception as e:
+        logger.exception(f"Error occurred: {e}")
+        resp, http_code = make_response_form(http_status=HTTP_500_INTERNAL_SERVER_ERROR)
+        return jsonify(resp), http_code
+
+
+@manage_bp.route("/department/<int:employee_id>/<string:new_department>", methods=["POST"])
+def department_transfer_route(employee_id: int, new_department: str):
+    """
+    Route to transfer an employee to a new department.
+    :param employee_id: The ID of the employee who will transfer the department
+    :param new_department: The Name of the new department
+    """
+    logger.info(f"Transfer employee request received for employee ID: {employee_id} to department ID: {department_id}")
+
+    # check valid department
+    valid_department, department_id = is_valid_department(new_department)
+    if not valid_department:
+        resp, http_code = make_response_form(http_status=HTTP_400_BAD_REQUEST, description="Invalid department")
+        return jsonify(resp), http_code
+    
+    # update employee department
+    try:
+        # Call the transfer_employee function from the db module
+        transfer_employee(employee_id, department_id)
+        logger.info(f"Employee transferred successfully: {employee_id} to department: {new_department}(id: {department_id})")
+        resp, http_code = make_response_form(http_status=HTTP_200_OK)
         return jsonify(resp), http_code
 
     except Exception as e:
