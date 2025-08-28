@@ -25,8 +25,8 @@ services:
       MYSQL_DATABASE: mydb
       MYSQL_USER: user
       MYSQL_PASSWORD: password
-    volumes:
-      - ./mysql-data:/var/lib/mysql
+    # volumes:
+    #   - ./mysql-data:/var/lib/mysql
     networks:
       - simple-python-flask-api-mockup-network
 

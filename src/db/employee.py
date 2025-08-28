@@ -71,11 +71,59 @@ def get_employees_by_department(department_id: int, cursor: pymysql.cursors.Dict
 
 
 @db_session_auto_close
-def delete_employee(employee_id: int, cursor: pymysql.cursors.DictCursor=None) -> None:
+def inactivate_employee(employee_id: int, cursor: pymysql.cursors.DictCursor=None) -> None:
     """
-    Delete an employee record by ID
+    Inactivate an employee record by ID
     :param employee_id: The ID of the employee
     :param cursor: The database cursor
     """
-    query = "DELETE FROM employee_list WHERE id = %(employee_id)s"
+    query = "UPDATE employee_list SET status = 0 WHERE id = %(employee_id)s"
     cursor.execute(query, {"employee_id": employee_id})
+
+
+@db_session_auto_close
+def promote_employee(employee_id: int, new_position: int, cursor: pymysql.cursors.DictCursor=None) -> None:
+    """
+    Promote an employee to a new position
+    :param employee_id: The ID of the employee
+    :param new_position: The new position ID
+    :param cursor: The database cursor
+    """
+    query = "UPDATE employee_list SET position = %(new_position)s WHERE id = %(employee_id)s"
+    cursor.execute(query, {"employee_id": employee_id, "new_position": new_position})
+
+
+@db_session_auto_close
+def transfer_employee(employee_id: int, new_department: int, cursor: pymysql.cursors.DictCursor=None) -> None:
+    """
+    Transfer an employee to a new department
+    :param employee_id: The ID of the employee
+    :param new_department: The new department ID
+    :param cursor: The database cursor
+    """
+    query = "UPDATE employee_list SET department = %(new_department)s WHERE id = %(employee_id)s"
+    cursor.execute(query, {"employee_id": employee_id, "new_department": new_department})
+
+
+@db_session_auto_close
+def get_employees(offset: int, limit: int, cursor: pymysql.cursors.DictCursor=None) -> List[dict]:
+    """
+    Get Employee's data by pagenation.
+    :param offset: The offset of the page
+    :param limit: The number of records to return
+    """
+    query = "SELECT * FROM employee_list LIMIT %(offset)s, %(limit)s"
+    cursor.execute(query, {"offset": offset, "limit": limit})
+    return cursor.fetchall()
+
+
+@db_session_auto_close
+def get_documents(offset: int, limit: int, cursor: pymysql.cursors.DictCursor=None) -> List[dict]:
+    """
+    Get Document's data by pagenation.
+    :param offset: The offset of the page
+    :param limit: The number of records to return
+    """
+    query = "SELECT * FROM document_approval LIMIT %(offset)s, %(limit)s"
+    cursor.execute(query, {"offset": offset, "limit": limit})
+    return cursor.fetchall()
