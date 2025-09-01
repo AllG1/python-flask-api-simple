@@ -3,6 +3,7 @@
 from functools import wraps
 import logging
 import os
+import time
 import pymysql
 from dbutils.pooled_db import PooledDB
 
@@ -25,26 +26,39 @@ DB_POOL: PooledDB = None
 # ============================================================================================
 def make_db_pool(settings: Settings) -> PooledDB:
     """ Make database connection pool """
-    try:
-        logger.info(f"[PID:{os.getpid()}] Creating database connection pool ({settings.rdb.host}:{settings.rdb.port}|{settings.rdb.database})")
-        DB_POOL = PooledDB(
-            creator=pymysql,
-            maxconnections=5,
-            mincached=2,
-            maxcached=5,
-            blocking=True,
-            maxusage=None,
-            setsession=[],
-            host=settings.rdb.host,
-            port=settings.rdb.port,
-            user=settings.rdb.user,
-            password=settings.rdb.password,
-            database=settings.rdb.database,
-            charset='utf8mb4',
-            autocommit=True
-        )
-    except Exception as e:
-        logger.critical(f"[PID:{os.getpid()}] Failed to create database connection pool: {e}")
+    connection_set = False
+    for i in range(5):
+        try:
+            # connect database
+            logger.info(f"[PID:{os.getpid()}] Creating database connection pool ({settings.rdb.host}:{settings.rdb.port}|{settings.rdb.database})")
+            DB_POOL = PooledDB(
+                creator=pymysql,
+                maxconnections=5,
+                mincached=2,
+                maxcached=5,
+                blocking=True,
+                maxusage=None,
+                setsession=[],
+                host=settings.rdb.host,
+                port=settings.rdb.port,
+                user=settings.rdb.user,
+                password=settings.rdb.password,
+                database=settings.rdb.database,
+                charset='utf8mb4',
+                autocommit=True
+            )
+            logger.info(f"[PID:{os.getpid()}] Database connection pool created successfully ({settings.rdb.host}:{settings.rdb.port}|{settings.rdb.database})")
+            connection_set = True
+            break
+        except Exception as e:
+            logger.critical(f"[PID:{os.getpid()}] Failed to create database connection pool: {e}")
+
+            # wait for loading of mysql container
+            logger.info(f"[PID:{os.getpid()}] Retrying to connect to the database in 10 seconds...")
+            time.sleep(10)
+        
+    if not connection_set:
+        logger.critical(f"[PID:{os.getpid()}] Exiting due to database connection failure.")
         exit(1)
 
     return DB_POOL
