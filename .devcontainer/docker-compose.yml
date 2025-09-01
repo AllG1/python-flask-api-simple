@@ -7,19 +7,19 @@ services:
       args:
         - VERSION=1.0.0
         - APP_ENV_TYPE=dev
-    container_name: "python-flask-api-mockup-container"
+    container_name: "python-flask-api-mockup-devcontainer"
     volumes:
       - ..:/workspace
       - /etc/hosts:/etc/hosts
     networks:
-      - simple-python-flask-api-mockup-network
+      - simple-python-flask-api-mockup-network-devcontainer
     command: ["sleep", "infinity"]
   
   mysql:
     build:
       context: ..
       dockerfile: ./.devcontainer/mysql.dockerfile
-    container_name: "python-flask-api-mockup-mysql"
+    container_name: "python-flask-api-mockup-devcontainer-mysql"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: mydb
@@ -28,11 +28,11 @@ services:
     # volumes:
     #   - ./mysql-data:/var/lib/mysql
     networks:
-      - simple-python-flask-api-mockup-network
+      - simple-python-flask-api-mockup-network-devcontainer
 
 networks:
-  simple-python-flask-api-mockup-network:
+  simple-python-flask-api-mockup-network-devcontainer:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.0.0/16
+        - subnet: 172.21.0.0/16

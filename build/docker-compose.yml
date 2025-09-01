@@ -3,16 +3,16 @@ services:
   app:
     image: python-flask-api-mockup-container-img:$VERSION
     container_name: "python-flask-api-mockup-container"
-    volumes:
-      - ../src:/workspace
-      - ../pyproject.toml:/workspace/pyproject.toml
-      - /etc/hosts:/etc/hosts
     environment:
       - VERSION=$VERSION
       - APP_ENV_TYPE=test
+    volumes:
+      - /etc/hosts:/etc/hosts
     networks:
       - simple-python-flask-api-mockup-network
-  
+    ports:
+      - "80:80"
+
   mysql:
     build:
       context: ..

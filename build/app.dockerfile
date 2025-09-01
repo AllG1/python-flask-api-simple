@@ -8,6 +8,11 @@ ENV TZ=Asia/Seoul
 # Set working directory
 WORKDIR /workspace
 
+# Copy necessary files
+COPY ./pyproject.toml /workspace/
+COPY ./build/uwsgi.ini /workspace/
+COPY ./build/entrypoint.sh /workspace/
+
 # Install Poetry
 ARG POETRY_VERSION="1.8.5"
 RUN pip install poetry==${POETRY_VERSION}
@@ -18,5 +23,4 @@ RUN poetry config virtualenvs.in-project true && \
 COPY ./src /workspace/
 
 # Run application
-# CMD [".venv/bin/python", "-m", "uwsgi", "--ini", "/workspace/uwsgi.ini"]
 CMD ["bash", "/workspace/entrypoint.sh"]
