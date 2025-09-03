@@ -1,32 +1,30 @@
 name: python-flask-api-mockup
 services:
   app:
-    build:
-      context: ..
-      dockerfile: ./.devcontainer/app.dockerfile
-      args:
-        - VERSION=1.0.0
-        - APP_ENV_TYPE=dev
+    image: python-flask-api-mockup-container-img:$VERSION
     container_name: "python-flask-api-mockup-container"
+    environment:
+      - VERSION=$VERSION
+      - APP_ENV_TYPE=test
     volumes:
-      - ..:/workspace
       - /etc/hosts:/etc/hosts
     networks:
       - simple-python-flask-api-mockup-network
-    command: ["sleep", "infinity"]
-  
+    ports:
+      - "80:80"
+
   mysql:
     build:
       context: ..
-      dockerfile: ./.devcontainer/mysql.dockerfile
+      dockerfile: ./build/mysql.dockerfile
     container_name: "python-flask-api-mockup-mysql"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: mydb
       MYSQL_USER: user
       MYSQL_PASSWORD: password
-    volumes:
-      - ./mysql-data:/var/lib/mysql
+    # volumes:
+    #   - ./mysql-data:/var/lib/mysql
     networks:
       - simple-python-flask-api-mockup-network
 
